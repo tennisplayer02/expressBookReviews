@@ -4,6 +4,20 @@ let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
+const API_BASE_URL = 'http://localhost:5000';
+
+const parseAxiosData = (data) => {
+  if (typeof data === 'string') {
+    return JSON.parse(data);
+  }
+  return data;
+};
+
+const sendAxiosError = (res, error, fallbackMessage) => {
+  const status = error.response?.status || 500;
+  const message = error.response?.data?.message || fallbackMessage;
+  return res.status(status).json({ message });
+};
 
 
 public_users.post("/register", (req,res) => {
@@ -29,13 +43,13 @@ public_users.get('/',function (req, res) {
 
 // Get the book list available in the shop using Promise callbacks with Axios
 public_users.get('/async', function (req, res) {
-  axios.get('http://localhost:5000/')
+  axios.get(`${API_BASE_URL}/`)
     .then((response) => {
-      const data = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+      const data = parseAxiosData(response.data);
       return res.status(200).send(JSON.stringify(data, null, 4));
     })
-    .catch(() => {
-      return res.status(500).json({ message: 'Unable to fetch books list' });
+    .catch((error) => {
+      return sendAxiosError(res, error, 'Unable to fetch books list');
     });
 });
 
@@ -47,15 +61,15 @@ public_users.get('/isbn/:isbn',function (req, res) {
 
 // Get book details based on ISBN using Promise callbacks with Axios
 public_users.get('/async/isbn/:isbn', function (req, res) {
-  const isbn = req.params.isbn;
+  const isbn = encodeURIComponent(req.params.isbn);
 
-  axios.get(`http://localhost:5000/isbn/${isbn}`)
+  axios.get(`${API_BASE_URL}/isbn/${isbn}`)
     .then((response) => {
-      const data = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+      const data = parseAxiosData(response.data);
       return res.status(200).send(JSON.stringify(data, null, 4));
     })
-    .catch(() => {
-      return res.status(500).json({ message: 'Unable to fetch book details by ISBN' });
+    .catch((error) => {
+      return sendAxiosError(res, error, 'Unable to fetch book details by ISBN');
     });
 });
   
@@ -76,15 +90,15 @@ public_users.get('/author/:author',function (req, res) {
 
 // Get book details based on author using Promise callbacks with Axios
 public_users.get('/async/author/:author', function (req, res) {
-  const author = req.params.author;
+  const author = encodeURIComponent(req.params.author);
 
-  axios.get(`http://localhost:5000/author/${author}`)
+  axios.get(`${API_BASE_URL}/author/${author}`)
     .then((response) => {
-      const data = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+      const data = parseAxiosData(response.data);
       return res.status(200).send(JSON.stringify(data, null, 4));
     })
-    .catch(() => {
-      return res.status(500).json({ message: 'Unable to fetch book details by author' });
+    .catch((error) => {
+      return sendAxiosError(res, error, 'Unable to fetch book details by author');
     });
 });
 
@@ -105,15 +119,15 @@ public_users.get('/title/:title',function (req, res) {
 
 // Get all books based on title using Promise callbacks with Axios
 public_users.get('/async/title/:title', function (req, res) {
-  const title = req.params.title;
+  const title = encodeURIComponent(req.params.title);
 
-  axios.get(`http://localhost:5000/title/${title}`)
+  axios.get(`${API_BASE_URL}/title/${title}`)
     .then((response) => {
-      const data = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+      const data = parseAxiosData(response.data);
       return res.status(200).send(JSON.stringify(data, null, 4));
     })
-    .catch(() => {
-      return res.status(500).json({ message: 'Unable to fetch book details by title' });
+    .catch((error) => {
+      return sendAxiosError(res, error, 'Unable to fetch book details by title');
     });
 });
 
